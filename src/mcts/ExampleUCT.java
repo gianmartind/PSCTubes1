@@ -2,6 +2,7 @@ package mcts;
 
 import game.Game;
 import main.collections.FastArrayList;
+import metadata.ai.heuristics.Heuristics;
 import util.AI;
 import util.Context;
 import util.Move;
@@ -25,7 +26,6 @@ public class ExampleUCT extends AI
 	
 	/** Our player index */
 	protected int player = -1;
-	
 	//-------------------------------------------------------------------------
 	
 	/**

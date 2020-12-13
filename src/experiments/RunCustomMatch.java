@@ -1,6 +1,7 @@
 package experiments;
 
 import game.Game;
+import minimax.Minimax;
 import random.RandomAI;
 import search.mcts.MCTS;
 import util.AI;
@@ -38,7 +39,7 @@ public class RunCustomMatch
 	//-------------------------------------------------------------------------
 	
 	/** Name of game we wish to play */
-	static final String GAME_NAME = "Amazons.lud";
+	static final String GAME_NAME = "Knightthrough.lud";
 	
 	/** Number of games to play */
 	static final int NUM_GAMES = 10;
@@ -64,8 +65,8 @@ public class RunCustomMatch
 		final Context context = new Context(game, trial);
 		final List<AI> ais = new ArrayList<AI>();
 		ais.add(null);
-		ais.add(new RandomAI());
-		ais.add(MCTS.createUCT());	// Note: built-in Ludii UCT! Not Example UCT.
+		ais.add(new Minimax());
+		ais.add(new Minimax());	// Note: built-in Ludii UCT! Not Example UCT.
 		
 		for (int gameCounter = 0; gameCounter < NUM_GAMES; ++gameCounter)
 		{

@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="PSCTubes1:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/PSCTubes1_jar</output-path>
+    <root id="archive" name="PSCTubes1.jar">
+      <element id="module-output" name="PSCTubes1" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../Kuliah/Pengantar Sistem Cerdas/Ludii-1.1.0/Ludii-1.1.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

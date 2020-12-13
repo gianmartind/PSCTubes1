@@ -5,6 +5,7 @@ import game.types.state.GameType;
 import main.FileHandling;
 import main.collections.FastArrayList;
 import mcts.ExampleUCT;
+import minimax.Minimax;
 import random.RandomAI;
 import util.*;
 import util.model.Model;
@@ -31,7 +32,7 @@ public class Tutorial
 		System.out.println("Built-in games = " + Arrays.toString(games));
 		
 		// one of the games is "Amazons.lud". Let's load it
-		Game game = GameLoader.loadGameFromName("Amazons.lud");
+		Game game = GameLoader.loadGameFromName("Knightthrough.lud");
 		
 		// the game's "stateFlags" contain properties of the game that may be
 		// important for some AI algorithms to know about
@@ -63,14 +64,22 @@ public class Tutorial
 			
 			// print the collection of locations that are empty
 			System.out.println("Empty locations = " + containerState.emptyChunkSetCell());
-			
+
 			// for every location that is owned by a player, print the owner
 			System.out.println("Who = " + containerState.cloneWhoCell().toChunkString());
-			
+			String s = containerState.cloneWhoCell().toString();
+			String[] array = s.substring(1, s.length()-1).split(", ");
+			Minimax.WhoCell[] cellDetails = new Minimax.WhoCell[array.length];
+			for(int i = 0; i < cellDetails.length; i++){
+				cellDetails[i] = new Minimax.WhoCell(Integer.parseInt(array[i]));
+			}
+			for(int i = 0; i < cellDetails.length; i++){
+				System.out.println("cell no: " + cellDetails[i].getCellNo() + " belongs to: " + cellDetails[i].getPlayer());
+			}
 			// for every location that is occupied by a piece, print what piece occupies it
-			System.out.println("What = " + containerState.cloneWhatCell().toChunkString());
+			System.out.println("What = " + containerState.cloneWhatCell());
 		}
-		
+		/*
 		// print the full list of all legal moves
 		final FastArrayList<Move> legalMoves = game.moves(context).moves();
 		System.out.println("Legal Moves = " + legalMoves);
@@ -263,5 +272,5 @@ public class Tutorial
 			System.out.println(context.trial().status());
 		}
 	}
-	
-}
+	*/
+}}
