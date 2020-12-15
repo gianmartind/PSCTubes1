@@ -12,6 +12,7 @@ import util.model.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * An example of a custom implementation of a match between different AIs,
@@ -66,7 +67,7 @@ public class RunCustomMatch
 		final List<AI> ais = new ArrayList<AI>();
 		ais.add(null);
 		ais.add(new Minimax());
-		ais.add(new Minimax());	// Note: built-in Ludii UCT! Not Example UCT.
+		ais.add(new RandomAI());	// Note: built-in Ludii UCT! Not Example UCT.
 		
 		for (int gameCounter = 0; gameCounter < NUM_GAMES; ++gameCounter)
 		{
