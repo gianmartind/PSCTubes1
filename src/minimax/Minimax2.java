@@ -2,6 +2,7 @@ package minimax;
 
 import game.Game;
 import main.collections.FastArrayList;
+import metadata.graphics.no.No;
 import random.RandomAI;
 import util.AI;
 import util.Context;
@@ -13,16 +14,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Minimax extends AI {
+public class Minimax2 extends AI {
 
     protected int player = -1;
     protected String analysisReport = "";
 
     protected List<Node> match;
 
-    public Minimax()
+    public Minimax2()
     {
-        this.friendlyName = "Example Minimax";
+        this.friendlyName = "Minimax 2";
         this.match = new LinkedList<>();
     }
 
@@ -42,17 +43,24 @@ public class Minimax extends AI {
         for(int i = 0; i < current.children.size(); i++){
             current.children.get(i).addAllChildren();
             //Pohon tiga tingkat
-//            for(int j = 0; j < current.children.get(i).children.size(); j++){
-//                current.children.get(i).children.get(j).addAllChildren();
-//            }
+            for(int j = 0; j < current.children.get(i).children.size(); j++){
+                current.children.get(i).children.get(j).addAllChildren();
+            }
         }
 
-        //Mencari value terbaik (sesuai player) yang bisa didapatkan dari state sekarang
-        int bestValue = minimax(current, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, this.player);
-        System.out.println("\nbestValue: " + bestValue);
+        //Buat Node baru dengan value Integer.MIN_VALUE untuk alpha (parameter bebas karena hanya value yg dipakai)
+        Node alpha = new Node(null, null, context);
+        alpha.setValue(Integer.MIN_VALUE);
 
-        Node toPick = findMax2(current, bestValue);
-        this.match.clear();
+        //Buat Node baru dengan value Integer.MAX_VALUE untuk beta (parameter bebas karena hanya value yg dipakai)
+        Node beta = new Node(null, null, context);
+        beta.setValue(Integer.MAX_VALUE);
+
+        //Jalankan algoritma minimax untuk mendapatkan node dengan value optimal, yang akan direturn
+        Node bestValue = minimax(current, 0, alpha, beta, this.player);
+        System.out.println("\nbestValue: " + bestValue.value);
+
+        //Node toPick = findMax2(current, bestValue);
         System.out.println(computeValue(current));
 
         for(int i = 0; i < current.children.size(); i++){
@@ -63,8 +71,13 @@ public class Minimax extends AI {
             System.out.println();
         }
 
-        System.out.println("picked: " + computeValue(toPick));
-        return toPick.moveFromParent;
+        //Ambil parent node (node yang merupakan child dari root) dari node yang terpilih
+        while(bestValue.parent.parent != null){
+            bestValue = bestValue.parent;
+        }
+
+        System.out.println("picked: " + bestValue.value);
+        return bestValue.moveFromParent;
     }
 
     /**
@@ -164,9 +177,18 @@ public class Minimax extends AI {
         return result1;
     }
 
+    /**
+     * Method untuk memeriksa apakah suatu bidak di titik i aman
+     * @param whoCells array yang berisi who cell
+     * @param i posisi yang akan diperiksa
+     * @return boolean apakah aman atau tidak
+     */
     public static boolean isSave(WhoCell[] whoCells, int i){
+        //jika bidak merupakan milik player 1
         if(whoCells[i].getPlayer() == 1){
+            //posisi dari bidak player 1 tersebut
             int pos = whoCells[i].getCellNo();
+            //cek apakah ada bidak lawan di posisi yang dapat menyerang
             for(int j = 0; j < whoCells.length; j++){
                 if(whoCells[j].getPlayer() == 2){
                     if(whoCells[j].getCellNo() == pos - 17 ||
@@ -182,8 +204,11 @@ public class Minimax extends AI {
                 }
             }
             return true;
+            //jika bidak merupakan milik player 2
         } else {
+            //posisi dari bidak player 1 tersebut
             int pos = whoCells[i].getCellNo();
+            //cek apakah ada bidak lawan di posisi yang dapat menyerang
             for(int j = 0; j < whoCells.length; j++){
                 if(whoCells[j].getPlayer() == 1){
                     if(whoCells[j].getCellNo() == pos - 17 ||
@@ -203,154 +228,40 @@ public class Minimax extends AI {
     }
 
     /**
-     * Method untuk menghitung jumlah bidak milik player 1 (bidak putih)
-     * @param node
-     * @return jumlah bidak player 1
-     */
-    public int countPlayer1(Node node){
-        //variabel untuk menyimpan jumlah
-        int count = 0;
-        //array WhoCell yang diisi dengan detail sesuai dari node parameter
-        WhoCell[] whoCells = this.getWhoCellDetails(node);
-        //looping untuk tiap item di array
-        for(int i = 0; i < whoCells.length; i++){
-            //jika item merupakan player 1 maka tambah count
-            if(whoCells[i].getPlayer() == 1){
-                count++;
-            }
-        }
-        //kembalikan count sebagai hasil penghitungan
-        return count;
-    }
-
-    /**
-     * Method untuk menghitung jumlah bidak milik player 2 (bidak hitam)
-     * @param node
-     * @return jumlah player 2
-     */
-    public int countPlayer2(Node node){
-        //variabel untuk menyimpan jumlah
-        int count = 0;
-        //array WhoCell yang diisi dengan detail sesuai dari node parameter
-        WhoCell[] whoCells = this.getWhoCellDetails(node);
-        //looping untuk tiap item di array
-        for(int i = 0; i < whoCells.length; i++){
-            //jika item merupakan player 2 maka tambah count
-            if(whoCells[i].getPlayer() == 2){
-                count++;
-            }
-        }
-        //kembalikan count sebagai hasil penghitungan
-        return count;
-    }
-
-    /**
-     * Method untuk mencari semua leaf node yang memiliki nilai max, sesuai dengan hasil dari minimax
-     * dijalankan dengan rekursif
-     * @param node diisi dengan node root
-     * @param value nilai maksimum dari minimax
-     * Akan mengembalikan parent node dari semua leaf node yang memiliki nilai sama dengan value
-     */
-    /*public void findMax(Node node, int value){
-        //jika sudah mencapai leaf
-        if(node.children.size() == 0){
-            //jika nilai dari node sama dengan value
-            if(computeValue(node) == value){
-                //buat node baru sama dengan node saat ini
-                Node temp = node;
-                //Naikkan node selama node bukan berada di tingkat 2 (child dari root)
-                while(temp.parent.parent != null){
-                    temp = temp.parent;
-                }
-                //Masukkan node ke array match
-                this.match.add(temp);
-            }
-        }
-        //jika belum mencapai leaf
-        else {
-            //untuk semua child dari node
-            for(int i = 0; i < node.children.size(); i++){
-                //jalankan method findMax
-                findMax(node.children.get(i), value);
-            }
-        }
-    }*/
-
-    public Node findMax2(Node node, int value){
-        for(int i = 0; i < node.children.size(); i++){
-            if(this.player == 1){
-                if(findMinInNode(node.children.get(i)) == value){
-                    return node.children.get(i);
-                }
-            } else {
-                if (findMaxInNode(node.children.get(i)) == value) {
-                    return node.children.get(i);
-                }
-            }
-        }
-        return null;
-    }
-
-    public int findMinInNode(Node node){
-        if(node.children.size() == 0){
-            return computeValue(node);
-        } else {
-            int min = Integer.MAX_VALUE;
-            for(int i = 0; i < node.children.size(); i++){
-                if(computeValue(node.children.get(i)) < min){
-                    min = computeValue(node.children.get(i));
-                }
-            }
-            return min;
-        }
-    }
-
-    public int findMaxInNode(Node node){
-        if(node.children.size() == 0){
-            return computeValue(node);
-        } else {
-            int max = Integer.MIN_VALUE;
-            for(int i = 0; i < node.children.size(); i++){
-                if(computeValue(node.children.get(i)) > max){
-                    max = computeValue(node.children.get(i));
-                }
-            }
-            return max;
-        }
-    }
-    /**
-     * Algoritma untuk Minimax
+     * Algoritma untuk Minimax dengan Alpha-Beta Pruning
      * sumber: https://www.geeksforgeeks.org/minimax-algorithm-in-game-theory-set-4-alpha-beta-pruning/
      * @param node
      * @param depth
      * @param alpha
      * @param beta
      * @param player
-     * @return
+     * @return Node dengan nilai optimal
      */
-    public int minimax(Node node, int depth, int alpha, int beta, int player){
+    public Node minimax(Node node, int depth, Node alpha, Node beta, int player){
         if(node.children.size() == 0){
-            return computeValue(node);
+            return node;
         }
 
         if(player == 1){
-            int bestVal = Integer.MIN_VALUE;
+            Node bestVal = new Node(null, null, node.context);
+            bestVal.setValue(Integer.MIN_VALUE);
             for(int i = 0; i < node.children.size(); i++){
-                int value = minimax(node.children.get(i), depth+1, alpha, beta, 2);
+                Node value = minimax(node.children.get(i), depth+1, alpha, beta, 2);
                 bestVal = max(bestVal, value);
                 alpha = max(alpha, bestVal);
-                if(beta <= alpha){
+                if(beta.value <= alpha.value){
                     break;
                 }
             }
             return bestVal;
         } else {
-            int bestVal = Integer.MAX_VALUE;
+            Node bestVal = new Node(null, null, node.context);
+            bestVal.setValue(Integer.MAX_VALUE);
             for(int i = 0; i < node.children.size(); i++){
-                int value = minimax(node.children.get(i), depth+1, alpha, beta, 1);
+                Node value = minimax(node.children.get(i), depth+1, alpha, beta, 1);
                 bestVal = min(bestVal, value);
                 beta = min(beta, bestVal);
-                if(beta <= alpha){
+                if(beta.value <= alpha.value){
                     break;
                 }
             }
@@ -365,8 +276,8 @@ public class Minimax extends AI {
      * @param b bilangan 2
      * @return nilai maksimum diantara a dan b
      */
-    public int max(int a, int b){
-        return a >= b ? a : b;
+    public Node max(Node a, Node b){
+        return a.value >= b.value ? a : b;
     }
 
     /**
@@ -375,8 +286,8 @@ public class Minimax extends AI {
      * @param b bilangan 2
      * @return nilai minimum diantara a dan b
      */
-    public int min(int a, int b){
-        return a >= b ? b : a;
+    public Node min(Node a, Node b){
+        return a.value >= b.value ? b : a;
     }
 
     /**
@@ -400,19 +311,19 @@ public class Minimax extends AI {
         //Kembalikan array yang berisi objek WhoCell
         return cellDetails;
     }
-    
+
     //Class untuk menyimpan state saat ini beserta semua kemungkinan state yang dapat dicapai dengan satu move.
     private static class Node {
-        
+
         //Node untuk menyimpan parent dari node saat ini, null untuk root
         private final Node parent;
 
         //Move yang harus dicapai untuk sampai ke Node ini
         private final Move moveFromParent;
-        
+
         //Context yang diperlukan untuk melihat state saat ini
         private final Context context;
-        
+
         //List yang berisi semua child Node (semua state yang mungkin dicapai)
         private final List<Node> children = new ArrayList<Node>();
 
@@ -445,6 +356,10 @@ public class Minimax extends AI {
                 this.context.game().apply(child, this.availableMoves.get(i));
                 this.children.add(new Node(this, this.availableMoves.get(i), child));
             }
+        }
+
+        public void setValue(int value){
+            this.value = value;
         }
     }
 

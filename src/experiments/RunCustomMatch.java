@@ -2,6 +2,8 @@ package experiments;
 
 import game.Game;
 import minimax.Minimax;
+import minimax.Minimax2;
+
 import random.RandomAI;
 import search.mcts.MCTS;
 import util.AI;
@@ -66,7 +68,7 @@ public class RunCustomMatch
 		final Context context = new Context(game, trial);
 		final List<AI> ais = new ArrayList<AI>();
 		ais.add(null);
-		ais.add(new Minimax());
+		ais.add(new Minimax2());
 		ais.add(new RandomAI());	// Note: built-in Ludii UCT! Not Example UCT.
 		
 		for (int gameCounter = 0; gameCounter < NUM_GAMES; ++gameCounter)
